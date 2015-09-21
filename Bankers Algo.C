@@ -32,7 +32,7 @@ void disp(int res[][5], int np, int nr)
 void main()
 {
 	int max[5][5], alloc[5][5], need[5][5], avail[5], pexec[5];
-	int i, j, np, nr, temp, break_flag = 0, notavail_flag = 0, exec_flag = 0;
+	int i, j, np, nr, temp, break_flag = 0, notavail_flag = 0, exec_flag = 0, safe_flag = 0;
 	clrscr();
 	printf("\nEnter the number of processes: ");
 	scanf("%d", &np);
@@ -81,7 +81,7 @@ void main()
 	{
 		pexec[i] = 0;
 	}
-	while(break_flag != 1)
+	while(break_flag == 0)
 	{
 		exec_flag = 0;
 		for(i = 0; i < np; i++)
@@ -89,19 +89,20 @@ void main()
 			notavail_flag = 0;
 			for(j = 0; j < nr; j++)
 			{
-				if(!(need[i][j] <= avail[j]) && (pexec[i] == 0))
+				if((need[i][j] > avail[j]) && (pexec[i] == 0))
 				{
 					notavail_flag = 1;
 					break;
 				}
 			}
-			if(!(notavail_flag) && (pexec[i] == 0))
+			if((!notavail_flag) && (pexec[i] == 0))
 			{
 				exec_flag = 1;
 				printf("\nProcess %d has been executed.", i + 1);
 				pexec[i] = 1;
 				for(j = 0; j < nr; j++)
 				{
+					avail[j] -= need[i][j];
 					avail[j] += need[i][j] + alloc[i][j];
 					alloc[i][j] = 0;
 					need[i][j] = -1;
@@ -116,6 +117,23 @@ void main()
 		{
 			break_flag = 0;
 		}
+	}
+	safe_flag = 1;
+	for(i = 0; i < np; i++)
+	{
+		if(pexec[i] == 0)
+		{
+			printf("\n\nProcess %d could not be executed.", i + 1);
+			safe_flag = 0;
+		}
+	}
+	if(safe_flag)
+	{
+		printf("\nSafe state.\n");
+	}
+	else
+	{
+		printf("\nUnsafe state.\n");
 	}
 	getch();
 }
